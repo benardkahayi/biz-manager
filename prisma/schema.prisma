@@ -1,0 +1,155 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================
+// USER (Auth.js user with password)
+// ============================================================
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  password String // bcrypted password
+  name     String?
+
+  // Relations
+  stockEntries StockEntry[]
+  sales        Sale[]
+  expenses     Expense[]
+
+  @@map("users")
+}
+
+// ============================================================
+// PROFILES (extends User model with role/permissions)
+// ============================================================
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  fullName  String   @default("")
+  role      String   @default("staff") // "admin" or "staff"
+  createdAt DateTime @default(now())
+
+  @@map("profiles")
+}
+
+// ============================================================
+// PRODUCTS
+// ============================================================
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  sku             String?  @unique
+  category        String?
+  sellingPrice    BigInt   @default(0) // TZS (whole numbers)
+  avgCost         BigInt   @default(0) // weighted average cost
+  quantityInStock Int      @default(0)
+  reorderLevel    Int      @default(5)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  stockEntries StockEntry[]
+  saleItems    SaleItem[]
+
+  @@index([isActive])
+  @@map("products")
+}
+
+// ============================================================
+// STOCK ENTRIES (incoming stock)
+// ============================================================
+model StockEntry {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId String
+  quantity  Int // must be > 0
+  unitCost  BigInt // TZS per unit
+  supplier  String?
+  notes     String?
+  entryDate DateTime @default(now()) @db.Date
+  createdBy User? @relation(fields: [createdById], references: [id])
+  createdById String?
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+  @@index([entryDate])
+  @@map("stock_entries")
+}
+
+// ============================================================
+// SALES (header)
+// ============================================================
+model Sale {
+  id            String   @id @default(cuid())
+  saleNumber    Int      @unique @default(autoincrement())
+  customerName  String?
+  saleDate      DateTime @default(now()) @db.Date
+  totalAmount   BigInt   @default(0) // TZS
+  totalCost     BigInt   @default(0) // COGS for profit calc
+  paymentStatus String   @default("paid") // "paid", "pending", "partial"
+  notes         String?
+  createdBy     User? @relation(fields: [createdById], references: [id])
+  createdById   String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  items SaleItem[]
+
+  @@index([saleDate])
+  @@map("sales")
+}
+
+// ============================================================
+// SALE ITEMS (lines within a sale)
+// ============================================================
+model SaleItem {
+  id        String  @id @default(cuid())
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId    String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId String
+  quantity  Int // must be > 0
+  unitPrice BigInt // selling price at time of sale
+  unitCost  BigInt // avg_cost snapshot at time of sale
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+// ============================================================
+// EXPENSES
+// ============================================================
+model Expense {
+  id          String   @id @default(cuid())
+  category    String // "rent", "salaries", "utilities", "transport", "supplies", "marketing", "other"
+  description String
+  amount      BigInt // TZS
+  expenseDate DateTime @default(now()) @db.Date
+  createdBy   User? @relation(fields: [createdById], references: [id])
+  createdById String?
+  createdAt   DateTime @default(now())
+
+  @@index([expenseDate])
+  @@index([category])
+  @@map("expenses")
+}
+model BusinessProfile {
+  id        String   @id @default(cuid())
+  storeName String   @default("")
+  address   String   @default("")
+  phone     String   @default("")
+  currency  String   @default("TZS")
+  updatedAt DateTime @updatedAt
+
+  @@map("business_profile")
+}
