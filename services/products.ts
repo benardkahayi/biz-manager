@@ -23,8 +23,9 @@ export async function createProduct(formData: FormData) {
 export async function deleteProduct(formData: FormData) {
   const id = formData.get("id") as string
 
-  await prisma.product.delete({
+  await prisma.product.update({
     where: { id: id },
+    data: { isActive: false },
   })
 
   revalidatePath("/products")
