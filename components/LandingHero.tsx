@@ -2,8 +2,17 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { Package, Receipt, Wallet, BarChart2, FileText } from "lucide-react"
 
 const words = ["Sales.", "Stock.", "Expenses.", "Profits."]
+
+const features = [
+  { label: "Inventory", icon: Package },
+  { label: "Sales", icon: Receipt },
+  { label: "Expenses", icon: Wallet },
+  { label: "Analytics", icon: BarChart2 },
+  { label: "Reports", icon: FileText },
+]
 
 export default function LandingHero({ userName }: { userName?: string | null }) {
   const [wordIndex, setWordIndex] = useState(0)
@@ -64,9 +73,13 @@ export default function LandingHero({ userName }: { userName?: string | null }) 
 
       {/* Feature pills */}
       <div className="animate-fade-up animation-delay-400 flex flex-wrap gap-2 justify-center mb-10">
-        {["📦 Inventory", "🧾 Sales", "💸 Expenses", "📊 Analytics", "📁 Reports"].map((f) => (
-          <span key={f} className="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300">
-            {f}
+        {features.map(({ label, icon: Icon }) => (
+          <span
+            key={label}
+            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300"
+          >
+            <Icon size={14} className="text-amber-400" />
+            {label}
           </span>
         ))}
       </div>

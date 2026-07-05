@@ -1,5 +1,4 @@
 ﻿"use client"
-
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
@@ -13,6 +12,7 @@ import {
   FileText,
   FileSpreadsheet,
   Settings,
+  Users,
   LogOut,
 } from "lucide-react"
 
@@ -34,11 +34,20 @@ const navGroups = [
       { name: "Reports",      href: "/reports",          icon: FileText,        color: "text-blue-500" },
       { name: "Excel Import", href: "/products/import",  icon: FileSpreadsheet, color: "text-green-500" },
       { name: "Settings",     href: "/settings",         icon: Settings,        color: "text-gray-500" },
+      { name: "Users",        href: "/users",            icon: Users,           color: "text-blue-500", adminOnly: true },
     ],
   },
 ]
 
-export default function Sidebar({ storeName = "Lizy liquor store" }: { storeName?: string }) {
+export default function Sidebar({
+  storeName = "Lizy liquor store",
+  role,
+  onNavigate,
+}: {
+  storeName?: string
+  role?: string
+  onNavigate?: () => void
+}) {
   const pathname = usePathname()
 
   const initials = storeName
@@ -64,23 +73,26 @@ export default function Sidebar({ storeName = "Lizy liquor store" }: { storeName
               {group.label}
             </div>
             <div className="flex flex-col gap-1">
-              {group.items.map(({ name, href, icon: Icon, color }) => {
-                const isActive = pathname === href
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={
-                      isActive
-                        ? "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-blue-600 text-white"
-                        : "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                    }
-                  >
-                    <Icon size={16} className={isActive ? "text-white" : color} />
-                    {name}
-                  </Link>
-                )
-              })}
+              {group.items
+                .filter((item) => !item.adminOnly || role === "admin")
+                .map(({ name, href, icon: Icon, color }) => {
+                  const isActive = pathname === href
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={onNavigate}
+                      className={
+                        isActive
+                          ? "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium bg-blue-600 text-white"
+                          : "flex items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      }
+                    >
+                      <Icon size={16} className={isActive ? "text-white" : color} />
+                      {name}
+                    </Link>
+                  )
+                })}
             </div>
           </div>
         ))}
