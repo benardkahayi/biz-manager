@@ -19,6 +19,7 @@ model User {
   password String // bcrypted password
   name     String?
   role String @default("staff")
+  isActive Boolean @default(true)
 
   // Relations
   stockEntries StockEntry[]
