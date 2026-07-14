@@ -1,11 +1,11 @@
 import { getUsers, createStaffUser } from "@/services/users"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
+import { DeleteUserButton } from "@/components/DeleteUserButton"
 
 export default async function UsersPage() {
   const session = await auth()
 
-  // Only admins may see this page
   if (session?.user?.role !== "admin") {
     redirect("/dashboard")
   }
@@ -49,6 +49,7 @@ export default async function UsersPage() {
               <th className="p-4 font-medium">Name</th>
               <th className="p-4 font-medium">Email</th>
               <th className="p-4 font-medium">Role</th>
+              <th className="p-4 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -60,6 +61,11 @@ export default async function UsersPage() {
                   <span className={`text-xs px-2 py-1 rounded-full ${u.role === "admin" ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-600"}`}>
                     {u.role}
                   </span>
+                </td>
+                <td className="p-4">
+                  {u.id !== session.user.id && (
+                    <DeleteUserButton userId={u.id} userName={u.name || u.email} />
+                  )}
                 </td>
               </tr>
             ))}

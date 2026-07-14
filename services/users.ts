@@ -36,3 +36,36 @@ export async function createStaffUser(formData: FormData) {
 
   revalidatePath("/users")
 }
+export async function deleteUser(userId: string) {
+  const session = await auth()
+  if (session?.user?.role !== "admin") {
+    throw new Error("Not authorized")
+  }
+
+  // Prevent an admin from accidentally deleting their own account while logged in
+  if (session.user.id === userId) {
+    throw new Error("You cannot delete your own account while logged in")
+  }
+
+  await prisma.user.delete({
+    where: { id: userId },
+  })
+
+  revalidatePath("/users")
+}
+export async function deleteUser(userId: string) {
+  const session = await auth()
+  if (session?.user?.role !== "admin") {
+    throw new Error("Not authorized")
+  }
+
+  if (session.user.id === userId) {
+    throw new Error("You cannot delete your own account while logged in")
+  }
+
+  await prisma.user.delete({
+    where: { id: userId },
+  })
+
+  revalidatePath("/users")
+}
