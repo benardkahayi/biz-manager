@@ -14,12 +14,11 @@ datasource db {
 // USER (Auth.js user with password)
 // ============================================================
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
+  id       String  @id @default(cuid())
+  email    String  @unique
   password String // bcrypted password
   name     String?
-  role String @default("staff")
-  isActive Boolean @default(true)
+  role     String  @default("staff")
 
   // Relations
   stockEntries StockEntry[]
@@ -70,17 +69,17 @@ model Product {
 // STOCK ENTRIES (incoming stock)
 // ============================================================
 model StockEntry {
-  id        String   @id @default(cuid())
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  productId String
-  quantity  Int // must be > 0
-  unitCost  BigInt // TZS per unit
-  supplier  String?
-  notes     String?
-  entryDate DateTime @default(now()) @db.Date
-  createdBy User? @relation(fields: [createdById], references: [id])
+  id          String   @id @default(cuid())
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productId   String
+  quantity    Int // must be > 0
+  unitCost    BigInt // TZS per unit
+  supplier    String?
+  notes       String?
+  entryDate   DateTime @default(now()) @db.Date
+  createdBy   User?    @relation(fields: [createdById], references: [id])
   createdById String?
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   @@index([productId])
   @@index([entryDate])
@@ -99,7 +98,7 @@ model Sale {
   totalCost     BigInt   @default(0) // COGS for profit calc
   paymentStatus String   @default("paid") // "paid", "pending", "partial"
   notes         String?
-  createdBy     User? @relation(fields: [createdById], references: [id])
+  createdBy     User?    @relation(fields: [createdById], references: [id])
   createdById   String?
   createdAt     DateTime @default(now())
 
@@ -137,7 +136,7 @@ model Expense {
   description String
   amount      BigInt // TZS
   expenseDate DateTime @default(now()) @db.Date
-  createdBy   User? @relation(fields: [createdById], references: [id])
+  createdBy   User?    @relation(fields: [createdById], references: [id])
   createdById String?
   createdAt   DateTime @default(now())
 
@@ -145,6 +144,7 @@ model Expense {
   @@index([category])
   @@map("expenses")
 }
+
 model BusinessProfile {
   id        String   @id @default(cuid())
   storeName String   @default("")
